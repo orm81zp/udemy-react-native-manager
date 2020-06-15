@@ -1,0 +1,1 @@
+export const ACTION_EMAIL_CHANGED = 'EMAIL_CHANGED';
