@@ -3,7 +3,8 @@ import { Actions } from 'react-native-router-flux';
 import {
   EMPLOYEE_UPDATE,
   EMPLOYEE_CREATE,
-  EMPLOYEES_FETCH_SUCCESS
+  EMPLOYEES_FETCH_SUCCESS,
+  EMPLOYEE_FORM_CLEAR
 } from './types'
 
 export const employeeUpdate = ({ prop, value }) => {
@@ -14,8 +15,9 @@ export const employeeUpdate = ({ prop, value }) => {
 };
 
 export const employeeCreate = ({ name, phone, shift }) => {
+  const { currentUser } = firebase.auth();
+
   return (dispatch) => {
-    const { currentUser } = firebase.auth();
     if (currentUser) {
       firebase.database().ref(`/users/${currentUser.uid}/employees`)
         .push({name, phone, shift })
@@ -24,12 +26,13 @@ export const employeeCreate = ({ name, phone, shift }) => {
           Actions.pop()
         });
     }
-  }
+  };
 };
 
 export const employeesFetch = () => {
+  const { currentUser } = firebase.auth();
+
   return (dispatch) => {
-    const { currentUser } = firebase.auth();
     if (currentUser) {
       firebase.database().ref(`/users/${currentUser.uid}/employees`)
         .on('value', (snapshot) => {
@@ -38,3 +41,35 @@ export const employeesFetch = () => {
     }
   }
 }
+
+export const employeeSave = ({ name, phone, shift, uid }) => {
+  const { currentUser } = firebase.auth();
+
+  return () => {
+    if (currentUser) {
+      firebase.database().ref(`/users/${currentUser.uid}/employees/${uid}`)
+        .set({name, phone, shift })
+        .then(() => {
+          Actions.pop();
+        });
+    }
+  };
+};
+
+export const employeeDelete = ({ uid }) => {
+  const { currentUser } = firebase.auth();
+
+  return () => {
+    if (currentUser) {
+      firebase.database().ref(`/users/${currentUser.uid}/employees/${uid}`)
+        .remove()
+        .then(() => {
+          Actions.pop();
+        });
+    }
+  };
+};
+
+export const employeeFormClear = () => {
+  return { type: EMPLOYEE_FORM_CLEAR };
+};
